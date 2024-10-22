@@ -1,6 +1,6 @@
 # printf_test
 A simple main file to test printf.
-This is main file I have been using to test my printf project.
+This is the main file I have been using to test my printf project.
 
 ### How to use it?
 compile the main with your project. 
@@ -18,4 +18,5 @@ execute it providing 2 arguments:
 ```
 ### Notes
 No guarantee that the test results are accurate.
+
 Any suggestions are welcome to improve the code or the tests.
