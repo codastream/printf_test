@@ -19,6 +19,7 @@
 # Libraries
 *.lib
 *.a
+!libft.a
 *.la
 *.lo
 
