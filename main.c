@@ -6,7 +6,7 @@
 /*   By: fpetit <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 18:15:34 by fpetit            #+#    #+#             */
-/*   Updated: 2024/10/22 21:43:56 by fpetit           ###   ########.fr       */
+/*   Updated: 2024/10/25 15:07:10 by fpetit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,16 @@ static bool	check_nb_printed_2(int rf, int rft, bool is_silent)
 	{
 		is_passed = true;
 		green();
-		is_silent ? 0 : printf("---> both printed %d chars", rf);
+		if (rf < 0)
+			is_silent ? 0 : printf("---> both returned %d", rf);
+		else	
+			is_silent ? 0 : printf("---> both printed %d chars", rf);
+	}
+	else if (rf == -1)
+	{
+		is_passed = false;
+		red();
+		is_silent ? 0 : printf("---> ft_printf should have returned %d  (instead was %d)", rf, rft);
 	}
 	else
 	{
@@ -164,8 +173,12 @@ bool	test_generic(char *desc, char *template, char *types, char *args[5], int ac
 	silent ? 0 : printf("%s", test_name);
 	silent ? 0 : printf("\n");
 	test = ft_calloc(150, sizeof(char));
-	ft_strlcpy(test, template, ft_strlen(template) + 1);
-	ft_strcat(test, " + '");
+	if (!template)
+		ft_strcat(test, "NULL");
+	else
+		ft_strlcpy(test, template, ft_strlen(template) + 1);
+	if (ac > 0)
+		ft_strcat(test, " + '");
 	i = 0;
 	while (i < ac)
 	{
@@ -178,7 +191,8 @@ bool	test_generic(char *desc, char *template, char *types, char *args[5], int ac
 		}
 		i++;
 	}
-	ft_strcat(test, "'");
+	if (ac > 0)
+		ft_strcat(test, "'");
 	yellow();
 	silent ? 0 : printf("%*s\n", WIDTH, test);
 	reset();
@@ -448,17 +462,25 @@ bool	test_percent_nominal(bool is_silent)
 	return (is_passed);
 }
 
-bool	test_percent_space(bool is_silent)
+bool	test_percent_unknownspec(bool is_silent)
 {
-	char *args[5] = {0};
+	char	*args[5] = {0};
 	bool	is_passed;
-	char *template = "% will it %%%compile?%";
+	char	*template = "you are the %king";
 
-	args[0] = "0";
-	is_passed = test_generic("% / space + c", template, "p", args, 1, is_silent);
+	is_passed = test_generic("% / %k", template, "%", args, 0, is_silent);
 	return (is_passed);
 }
 
+bool	test_percent_final(bool is_silent)
+{
+	char	*args[5] = {0};
+	bool	is_passed;
+	char	*template = "check here%";
+
+	is_passed = test_generic("% / final", template, "%", args, 0, is_silent);
+	return (is_passed);
+}
 
 // MISC
 bool	test_misc_mixed1(bool is_silent)
@@ -506,7 +528,7 @@ bool	test_misc_no_arg_null(bool is_silent)
 
 void 	test_char(int is_short)
 {
-	printf("=== CHARACTERS\t");
+	printf("\n=== CHARACTERS\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
@@ -535,7 +557,7 @@ void 	test_char(int is_short)
 
 void 	test_str(int is_short)
 {
-	printf("=== STRINGS\t");
+	printf("\n=== STRINGS\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
@@ -564,7 +586,7 @@ void 	test_str(int is_short)
 
 void 	test_int(int is_short)
 {
-	printf("=== INTEGER\t");
+	printf("\n=== INTEGER\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
@@ -596,7 +618,7 @@ void 	test_int(int is_short)
 
 void 	test_unsint(int is_short)
 {
-	printf("=== UNSIGNED\t");
+	printf("\n=== UNSIGNED\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
@@ -628,7 +650,7 @@ void 	test_unsint(int is_short)
 
 void 	test_hexU(int is_short)
 {
-	printf("=== HEXA UPPER\t");
+	printf("\n=== HEXA UPPER\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
@@ -657,7 +679,7 @@ void 	test_hexU(int is_short)
 
 void 	test_hexl(int is_short)
 {
-	printf("=== HEXA lower\t");
+	printf("\n=== HEXA lower\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
@@ -686,7 +708,7 @@ void 	test_hexl(int is_short)
 
 void 	test_address(int is_short)
 {
-	printf("=== ADDRESS\t");
+	printf("\n=== ADDRESS\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
@@ -715,40 +737,45 @@ void 	test_address(int is_short)
 
 void 	test_percent(int is_short)
 {
-	printf("=== PERCENT\t");
+	printf("\n=== PERCENT\t");
 	if (is_short)
 	{
 		center_text("nominal", COLWIDTH, strlen("nominal"));
 		printf("\t|");
 		printf("\t\t|");
-		center_text("space", COLWIDTH, strlen("space"));
+		center_text("%k", COLWIDTH, strlen("%k"));
+		printf("\t|");
+		center_text("final", COLWIDTH, strlen("%k"));
 		printf("\t|\n");
 
 		printf("\t\t");	
 		print_res(test_percent_nominal(is_short));
 		printf("\t|");
 		printf("\t\t|");
-		print_res(test_percent_space(is_short));
+		print_res(test_percent_unknownspec(is_short));
+		printf("\t|");
+		print_res(test_percent_final(is_short));
 		printf("\t|\n");
 	}
 	else
 	{
 		test_percent_nominal(is_short);
-		test_percent_space(is_short);
+		test_percent_unknownspec(is_short);
+		test_percent_final(is_short);
 		printf("\n.............................................................\n");
 	}
 }
 
 void 	test_misc(int is_short)
 {
-	printf("=== MISC.\t");
+	printf("\n=== MISC.\t");
 	if (is_short)
 	{
 		center_text("mixed 1", COLWIDTH, strlen("mixed 1"));
 		printf("\t|");
 		center_text("mixed 2", COLWIDTH, strlen("mixed 2"));
 		printf("\t|");
-		center_text("", COLWIDTH, strlen(""));
+		center_text("NULL", COLWIDTH, strlen("NULL"));
 		printf("\t|\n");
 
 		printf("\t\t");	
@@ -756,13 +783,13 @@ void 	test_misc(int is_short)
 		printf("\t|");
 		print_res(test_misc_mixed2(is_short));
 		printf("\t|");
-//		print_res(test_misc_no_arg_null(is_short));
-		printf("\t\t|\n");
+		print_res(test_misc_no_arg_null(is_short));
+		printf("\t|\n");
 	}
 	else{
 		test_misc_mixed1(is_short);
 		test_misc_mixed2(is_short);
-//		test_misc_no_arg_null(is_short);
+		test_misc_no_arg_null(is_short);
 		printf("\n.............................................................\n");
 	}
 }
@@ -801,10 +828,10 @@ int	main(int ac, char **av)
 	(void) ac;
 	if (ac != 3)
 	{
-		printf("usage : 2 args <specifiers> <mode>\n\
+		printf("\t\t\t\tusage : 2 args <specifiers> <mode>\n\
 				*specifiers can be composed of following characters:\n\
 				\tcsdiup : to test chars, strings, ...\n\
-				\t%%n\
+				\t%%\n\
 				\tm for other tests\n\
 				*mode : all/short/detail\n");
 		return (0);
