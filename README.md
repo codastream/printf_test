@@ -24,4 +24,4 @@ Only covers the mandatory part (no bonus).
 
 No guarantee that the test results are accurate.
 
-Any suggestions are welcome to improve the code or the tests.
+Any suggestion is welcome to improve the code or the tests.
